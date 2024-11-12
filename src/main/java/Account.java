@@ -4,7 +4,7 @@ public abstract class Account {
 	private final double apr; // Annual Percentage Rate
 	private double balance;
 
-	public Account(String accountId, double apr) {
+	protected Account(String accountId, double apr) {
 		this.accountId = accountId;
 		this.apr = apr;
 		this.balance = 0.0;
