@@ -23,9 +23,9 @@ test {
 }
 
 jacocoTestReport {
-  reports {
-    xml.enabled true
-    xml.destination = project.file("builds/jacoco/jacoco.xml")
-  }
+    reports {
+        //xml.enabled true
+        xml.destination = project.file("builds/jacoco/jacoco.xml")
+    }
 }
 
