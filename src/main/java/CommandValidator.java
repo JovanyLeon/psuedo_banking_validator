@@ -1,65 +1,71 @@
 public class CommandValidator {
-	private Bank bank;
-	private CheckingCommandHandler checkingHandler;
-	private SavingsCommandHandler savingsHandler;
-	private CDCommandHandler cdHandler;
+
+	private final Bank bank;
 
 	public CommandValidator(Bank bank) {
 		this.bank = bank;
-		this.checkingHandler = new CheckingCommandHandler(bank);
-		this.savingsHandler = new SavingsCommandHandler(bank);
-		this.cdHandler = new CDCommandHandler(bank);
 	}
 
-	public String processCommand(String command) {
+	public boolean validate(String command) {
 		if (command == null || command.trim().isEmpty()) {
-			return "Invalid command format.";
+			return false; // Invalid input
 		}
 
 		String[] parts = command.trim().split("\\s+");
 		if (parts.length < 2) {
-			return "Invalid command format.";
+			return false; // Too few arguments
 		}
 
 		String action = parts[0];
-		String type = parts[1];
-
 		switch (action) {
 		case "create":
-			return handleCreateCommand(parts);
+			return isValidCreateCommand(parts);
+		case "deposit":
+			return isValidDepositCommand(parts);
 		default:
-			return "Unknown command.";
+			return false; // Unknown command
 		}
 	}
 
-	private String handleCreateCommand(String[] parts) {
-		if (parts.length < 3) {
-			return "Invalid create command format.";
+	private boolean isValidCreateCommand(String[] parts) {
+		if (parts.length < 4) {
+			return false; // Not enough arguments
 		}
 
-		String type = parts[1];
-		switch (type) {
-		case "checking":
-			if (parts.length == 4) {
-				return new CheckingCommandHandler(bank).processCreateCommand(String.join(" ", parts));
-			} else {
-				return "Invalid arguments for create checking.";
+		String accountType = parts[1];
+		String accountId = parts[2];
+		if (bank.getAccount(accountId) != null) {
+			return false; // Duplicate account ID
+		}
+
+		try {
+			double apr = Double.parseDouble(parts[3]);
+			if (apr < 0) {
+				return false; // APR must be non-negative
 			}
-		case "savings":
-			if (parts.length == 4) {
-				return new SavingsCommandHandler(bank).processCreateCommand(String.join(" ", parts));
-			} else {
-				return "Invalid arguments for create savings.";
+
+			if (accountType.equals("cd") && parts.length == 5) {
+				double initialBalance = Double.parseDouble(parts[4]);
+				return initialBalance >= 0; // Initial balance must be non-negative
 			}
-		case "cd":
-			if (parts.length == 5) {
-				return new CDCommandHandler(bank).processCreateCommand(String.join(" ", parts));
-			} else {
-				return "Invalid arguments for create cd.";
-			}
-		default:
-			return "Unknown account type.";
+
+			return accountType.equals("checking") || accountType.equals("savings");
+		} catch (NumberFormatException e) {
+			return false; // Invalid APR or initial balance format
 		}
 	}
 
+	private boolean isValidDepositCommand(String[] parts) {
+		if (parts.length != 3) {
+			return false; // Deposit commands must have exactly 3 parts
+		}
+
+		String accountId = parts[1];
+		try {
+			double amount = Double.parseDouble(parts[2]);
+			return bank.getAccount(accountId) != null && amount > 0; // Account must exist, and amount must be positive
+		} catch (NumberFormatException e) {
+			return false; // Invalid amount format
+		}
+	}
 }
