@@ -1,11 +1,10 @@
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class CommandValidatorTest {
-
 	private Bank bank;
 	private CommandValidator validator;
 
@@ -16,67 +15,34 @@ public class CommandValidatorTest {
 	}
 
 	@Test
-	public void testCreateChecking() {
-		String result = validator.processCommand("create checking A1 0.01");
-		assertEquals("Checking account created successfully.", result);
-		Account account = bank.getAccount("A1");
-		assertNotNull(account);
-		assertEquals("A1", account.getAccountId());
-		assertEquals(0.01, account.getApr(), 0.01);
+	public void testValidCreateCommand() {
+		boolean actual = validator.validate("create checking 12345678 1.5");
+		assertTrue(actual, "Valid create command should return true.");
 	}
 
 	@Test
-	public void testCreateSavings() {
-		String result = validator.processCommand("create savings A2 0.02");
-		assertEquals("Savings account created successfully.", result);
-		Account account = bank.getAccount("A2");
-		assertNotNull(account);
-		assertEquals("A2", account.getAccountId());
-		assertEquals(0.02, account.getApr(), 0.01);
+	public void testDuplicateAccountId() {
+		bank.createCheckingAccount("12345678", 1.5);
+		boolean actual = validator.validate("create checking 12345678 1.5");
+		assertFalse(actual, "Duplicate account ID should return false.");
 	}
 
 	@Test
-	public void testCreateCD() {
-		String result = validator.processCommand("create cd A3 0.03 1000");
-		assertEquals("CD account created successfully.", result);
-		Account account = bank.getAccount("A3");
-		assertNotNull(account);
-		assertEquals("A3", account.getAccountId());
-		assertEquals(0.03, account.getApr(), 0.01);
-		assertEquals(1000, account.getBalance(), 0.01);
+	public void testInvalidCreateCommandFormat() {
+		boolean actual = validator.validate("create checking 12345678");
+		assertFalse(actual, "Create command with insufficient arguments should return false.");
 	}
 
 	@Test
-	public void testAccountsCount() {
-		validator.processCommand("create checking A1 0.01");
-		validator.processCommand("create savings A2 0.02");
-		validator.processCommand("create cd A3 0.03 1000");
-
-		String result = validator.processCommand("accounts_count");
-		assertEquals("Total accounts: 3", result);
+	public void testValidDepositCommand() {
+		bank.createCheckingAccount("12345678", 1.5);
+		boolean actual = validator.validate("deposit 12345678 500");
+		assertTrue(actual, "Valid deposit command should return true.");
 	}
 
 	@Test
-	public void testInvalidCreateCommand() {
-		String result = validator.processCommand("create");
-		assertEquals("Invalid create command format.", result);
-
-		result = validator.processCommand("create invalid A1 0.01");
-		assertEquals("Unknown account type.", result);
-
-		result = validator.processCommand("create checking");
-		assertEquals("Invalid arguments for create checking.", result);
-	}
-
-	@Test
-	public void testUnknownCommand() {
-		String result = validator.processCommand("unknown_command");
-		assertEquals("Unknown command.", result);
-	}
-
-	@Test
-	public void testEmptyCommand() {
-		String result = validator.processCommand("");
-		assertEquals("Invalid command format.", result);
+	public void testInvalidDepositCommandFormat() {
+		boolean actual = validator.validate("deposit 12345678");
+		assertFalse(actual, "Deposit command with insufficient arguments should return false.");
 	}
 }
