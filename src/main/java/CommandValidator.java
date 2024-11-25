@@ -32,6 +32,11 @@ public class CommandValidator {
 			return false; // Not enough arguments
 		}
 
+		// Validate argument count
+		if (!hasValidArgumentCount(parts)) {
+			return false; // Invalid number of arguments for the create command
+		}
+
 		String accountType = parts[1];
 		String accountId = parts[2];
 
@@ -46,11 +51,7 @@ public class CommandValidator {
 		}
 
 		// Validate APR
-		if (!isValidAPR(parts[3])) {
-			return false; // Invalid APR
-		}
-
-		return true;
+		return isValidAPR(parts[3]); // Invalid APR
 	}
 
 	private boolean isValidAccountType(String accountType) {
@@ -64,6 +65,23 @@ public class CommandValidator {
 		} catch (NumberFormatException e) {
 			return false; // Invalid APR if it can't be parsed to a double
 		}
+	}
+
+	private boolean hasValidArgumentCount(String[] parts) {
+		String accountType = parts[1];
+
+		// If creating a checking or savings account, it should have exactly 4 arguments
+		if (accountType.equals("checking") || accountType.equals("savings")) {
+			return parts.length == 4;
+		}
+
+		// If creating a CD account, it should have exactly 5 arguments
+		if (accountType.equals("cd")) {
+			return parts.length == 5;
+		}
+
+		// If the account type is invalid, return false
+		return false;
 	}
 
 	private boolean isValidDepositCommand(String[] parts) {
