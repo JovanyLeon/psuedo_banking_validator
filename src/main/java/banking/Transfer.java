@@ -23,6 +23,13 @@ public class Transfer {
 			return;
 		}
 
+		String fromAccountType = bank.getAccountType(fromAccountId);
+		String toAccountType = bank.getAccountType(toAccountId);
+
+		if (fromAccountType.equals("cd") || toAccountType.equals("cd")) {
+			throw new IllegalArgumentException("CD accounts cannot be involved in a transfer.");
+		}
+
 		fromAccount.withdraw(amount);
 		toAccount.deposit(amount);
 	}
