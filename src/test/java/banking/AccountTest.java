@@ -90,5 +90,10 @@ public class AccountTest {
 		public TestAccount(String accountId, double apr) {
 			super(accountId, apr);
 		}
+
+		@Override
+		public String getType() {
+			return "testing";
+		}
 	}
 }

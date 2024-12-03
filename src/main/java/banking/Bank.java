@@ -29,4 +29,12 @@ public class Bank {
 	public int getAccountsCount() {
 		return accounts.size();
 	}
+
+	public String getAccountType(String accountId) {
+		Account account = accounts.get(accountId);
+		if (account == null) {
+			throw new IllegalArgumentException("Account does not exist.");
+		}
+		return account.getType();
+	}
 }

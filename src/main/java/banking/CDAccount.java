@@ -5,4 +5,10 @@ public class CDAccount extends Account {
 		super(accountId, apr);
 		setBalance(initialBalance);
 	}
+
+	@Override
+	public String getType() {
+		return "cd";
+	}
+
 }

@@ -34,7 +34,7 @@ public abstract class Account {
 		}
 	}
 
-	public void withdraw(double amount) {
+	public double withdraw(double amount) {
 		if (amount > 0) {
 			if (this.balance >= amount) {
 				this.balance -= amount;
@@ -42,5 +42,8 @@ public abstract class Account {
 				this.balance = 0;
 			}
 		}
+		return amount;
 	}
+
+	public abstract String getType();
 }

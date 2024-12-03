@@ -5,4 +5,9 @@ public class Checkings extends Account {
 		super(accountId, apr);
 	}
 
+	@Override
+	public String getType() {
+		return "checking";
+	}
+
 }
