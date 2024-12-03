@@ -1,3 +1,5 @@
+package banking;
+
 public class DepositCommandValidator {
 	private final Bank bank;
 
@@ -15,7 +17,7 @@ public class DepositCommandValidator {
 		// Check if the account exists
 		Account account = bank.getAccount(accountId);
 		if (account == null) {
-			return false; // Account does not exist
+			return false; // banking.Account does not exist
 		}
 
 		// Validate deposit amount

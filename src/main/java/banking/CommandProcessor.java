@@ -1,3 +1,5 @@
+package banking;
+
 public class CommandProcessor {
 	private final Bank bank;
 	private final CommandValidator commandValidator;

@@ -1,10 +1,12 @@
+package banking;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for the abstract Account class. Since Account is abstract, we'll
- * use a concrete subclass for testing.
+ * Test class for the abstract banking.Account class. Since banking.Account is
+ * abstract, we'll use a concrete subclass for testing.
  */
 public class AccountTest {
 
@@ -83,7 +85,7 @@ public class AccountTest {
 		assertEquals(500, account.getBalance(), 0.01);
 	}
 
-	// A concrete subclass of Account for testing purposes
+	// A concrete subclass of banking.Account for testing purposes
 	private static class TestAccount extends Account {
 		public TestAccount(String accountId, double apr) {
 			super(accountId, apr);
