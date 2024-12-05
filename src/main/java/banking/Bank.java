@@ -1,6 +1,7 @@
 package banking;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 public class Bank {
@@ -22,6 +23,10 @@ public class Bank {
 		accounts.put(accountId, new CDAccount(accountId, apr, initialBalance));
 	}
 
+	public Map<String, Account> getAllAccounts() {
+		return accounts;
+	}
+
 	public Account getAccount(String accountId) {
 		return accounts.get(accountId);
 	}
@@ -36,5 +41,20 @@ public class Bank {
 			throw new IllegalArgumentException("Account does not exist.");
 		}
 		return account.getType();
+	}
+
+	public void passTime(int months) {
+		if (months < 1 || months > 60) {
+			throw new IllegalArgumentException("Months must be between 1 and 60.");
+		}
+
+		Iterator<Map.Entry<String, Account>> iterator = accounts.entrySet().iterator();
+		while (iterator.hasNext()) {
+			Account account = iterator.next().getValue();
+			account.pass(months);
+			if (account.getBalance() == 0) {
+				iterator.remove(); // Close the account if the balance is zero
+			}
+		}
 	}
 }

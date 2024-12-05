@@ -46,4 +46,27 @@ public abstract class Account {
 	}
 
 	public abstract String getType();
+
+	public void calculateMonthlyAPR() {
+		if (balance > 0) {
+			double monthlyRate = apr / 100 / 12; // Convert APR to monthly rate
+			balance += balance * monthlyRate;
+		}
+	}
+
+	public void pass(int months) {
+		for (int i = 0; i < months; i++) {
+			// Deduct minimum balance fee if applicable
+			if (balance > 0 && balance < 100) {
+				balance -= 25;
+				if (balance < 0) {
+					balance = 0;
+				}
+			}
+
+			// Accrue monthly APR
+			calculateMonthlyAPR();
+		}
+	}
+
 }
