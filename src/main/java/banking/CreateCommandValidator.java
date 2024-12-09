@@ -22,11 +22,6 @@ public class CreateCommandValidator {
 			return false; // Incorrect number of arguments
 		}
 
-		// Validate account type
-		if (!isValidAccountType(accountType)) {
-			return false; // Invalid account type
-		}
-
 		// Check if the account already exists
 		if (bank.getAccount(accountId) != null) {
 			return false; // Duplicate account ID

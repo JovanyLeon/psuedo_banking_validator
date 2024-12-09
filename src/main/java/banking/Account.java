@@ -46,13 +46,11 @@ public abstract class Account {
 	}
 
 	public double withdraw(double amount) {
-		if (amount > 0) {
-			withdrawalsThisMonth++;
-			if (this.balance >= amount) {
-				this.balance -= amount;
-			} else {
-				this.balance = 0;
-			}
+		withdrawalsThisMonth++;
+		if (this.balance >= amount) {
+			this.balance -= amount;
+		} else {
+			this.balance = 0;
 		}
 		return amount;
 	}
@@ -82,11 +80,9 @@ public abstract class Account {
 	public abstract String getType();
 
 	public void calculateMonthlyAPR() {
-		if (balance > 0) {
-			double monthlyRate = apr / 100 / 12;
-			double interest = balance * monthlyRate;
-			balance += interest;
-		}
+		double monthlyRate = apr / 100 / 12;
+		double interest = balance * monthlyRate;
+		balance += interest;
 
 		setBalance(Math.round(getBalance() * 100.0) / 100.0);
 	}

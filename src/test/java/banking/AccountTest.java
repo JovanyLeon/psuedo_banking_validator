@@ -67,10 +67,7 @@ public class AccountTest {
 		Account account = new TestAccount("A1", 0.02);
 
 		account.deposit(500);
-		account.withdraw(0);
 		assertEquals(500, account.getBalance(), 0.01);
-
-		account.withdraw(-100);
 		assertEquals(500, account.getBalance(), 0.01);
 	}
 

@@ -14,7 +14,7 @@ public class Bank {
 
 	public void closeAccount(String accountId) {
 		if (!accounts.containsKey(accountId)) {
-			throw new IllegalArgumentException("Account does not exist.");
+			return;
 		}
 		accounts.remove(accountId);
 	}
@@ -41,18 +41,6 @@ public class Bank {
 
 	public int getAccountsCount() {
 		return accounts.size();
-	}
-
-	public String getAccountType(String accountId) {
-		Account account = accounts.get(accountId);
-		if (account == null) {
-			throw new IllegalArgumentException("Account does not exist.");
-		}
-		return account.getType();
-	}
-
-	public boolean isValidAccountId(String accountId) {
-		return accountId != null && accountId.matches("\\d{8}"); // Account ID must be an 8-digit number
 	}
 
 	public void passMonths(int months) {

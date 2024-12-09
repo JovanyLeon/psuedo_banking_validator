@@ -15,7 +15,6 @@ public class DepositCommandProcessor {
 		}
 
 		String[] parts = command.split(" ");
-		String action = parts[0].toLowerCase();
 		String accountId = parts[1];
 		double amount = Double.parseDouble(parts[2]);
 		Account account = bank.getAccount(accountId);

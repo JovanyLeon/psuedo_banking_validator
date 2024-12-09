@@ -12,7 +12,6 @@ public class CreateCommandProcessor {
 	public void process(String command) {
 
 		String[] parts = command.split(" ");
-		String action = parts[0].toLowerCase();
 		String accountType = parts[1].toLowerCase();
 
 		if (!accountType.equals("checking") && !accountType.equals("savings") && !accountType.equals("cd")) {
