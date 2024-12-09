@@ -9,5 +9,4 @@ public class Savings extends Account {
 	public String getType() {
 		return "savings";
 	}
-
 }
