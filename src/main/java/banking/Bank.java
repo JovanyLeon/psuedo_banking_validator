@@ -62,7 +62,9 @@ public class Bank {
 
 			// Add transaction history for the account
 			List<String> transactionHistory = commandStorage.getTransactionHistory(account.getAccountId());
-			output.addAll(transactionHistory);
+			for (String transaction : transactionHistory) {
+				output.add(capitalizeFirstLetter(transaction));
+			}
 		}
 		return output;
 	}
