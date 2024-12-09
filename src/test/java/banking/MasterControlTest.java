@@ -16,7 +16,8 @@ public class MasterControlTest {
 	void setUp() {
 		input = new ArrayList<>();
 		Bank bank = new Bank();
-		masterControl = new MasterControl(new CommandValidator(bank), new CommandProcessor(bank), new CommandStorage());
+		masterControl = new MasterControl(bank, new CommandValidator(bank), new CommandProcessor(bank),
+				new CommandStorage());
 	}
 
 	private void assertSingleCommand(String command, List<String> actual) {
@@ -29,7 +30,7 @@ public class MasterControlTest {
 		input.add("creat checking 12345678 1.0");
 
 		List<String> actual = masterControl.start(input);
-		assertSingleCommand("creat checking 12345678 1.0", actual);
+		assertSingleCommand("creat checking 12345678 1.0", actual); // Expecting an invalid command
 	}
 
 	@Test
@@ -37,7 +38,7 @@ public class MasterControlTest {
 		input.add("depositt 12345678 100");
 
 		List<String> actual = masterControl.start(input);
-		assertSingleCommand("depositt 12345678 100", actual);
+		assertSingleCommand("depositt 12345678 100", actual); // Expecting an invalid command
 	}
 
 	@Test
@@ -48,8 +49,8 @@ public class MasterControlTest {
 		List<String> actual = masterControl.start(input);
 
 		assertEquals(2, actual.size());
-		assertEquals("creat checking 12345678 1.0", actual.get(0));
-		assertEquals("depositt 12345678 100", actual.get(1));
+		assertEquals("creat checking 12345678 1.0", actual.get(0)); // Expecting invalid create command
+		assertEquals("depositt 12345678 100", actual.get(1)); // Expecting invalid deposit command
 	}
 
 	@Test
@@ -58,7 +59,97 @@ public class MasterControlTest {
 		input.add("create checking 12345678 1.0");
 
 		List<String> actual = masterControl.start(input);
-		assertSingleCommand("create checking 12345678 1.0", actual);
+		assertEquals(2, actual.size());
+		assertEquals("checking 12345678 0.00 1.00", actual.get(0)); // Expecting original command to fail
+		assertEquals("create checking 12345678 1.0", actual.get(1)); // Expecting duplicate account creation error
 	}
 
+	@Test
+	void typo_in_pass_command() {
+		input.add("create checking 12345678 1.0");
+		input.add("passs 87");
+
+		List<String> actual = masterControl.start(input);
+		assertEquals(2, actual.size());
+		assertEquals("checking 12345678 0.00 1.00", actual.get(0)); // Expecting valid account creation output
+		assertEquals("passs 87", actual.get(1)); // Expecting invalid 'pass' command
+	}
+
+	@Test
+	void invalid_typo_in_withdraw_command() {
+		input.add("Widthdrawl 123456789 300");
+		List<String> actual = masterControl.start(input);
+		assertSingleCommand("Widthdrawl 123456789 300", actual); // Expecting invalid withdraw command
+	}
+
+	@Test
+	void typo_in_withdraw_command() {
+		input.add("create checking 12345678 1.0");
+		input.add("withdrawlw 123456789 300");
+
+		List<String> actual = masterControl.start(input);
+		assertEquals(2, actual.size());
+		assertEquals("checking 12345678 0.00 1.00", actual.get(0)); // Expecting valid account creation output
+		assertEquals("withdrawlw 123456789 300", actual.get(1)); // Expecting invalid withdraw command
+	}
+
+	@Test
+	void typo_in_transfer_command_invalid() {
+		input.add("transferer 32345678  1.0");
+
+		List<String> actual = masterControl.start(input);
+		assertSingleCommand("transferer 32345678  1.0", actual); // Expecting invalid transfer command
+	}
+
+	@Test
+	void multiple_typo_found_except_1() {
+		input.add("creat checking 12345678 1.0");
+		input.add("depositt 12345678 100");
+		input.add("withdrawll 123456789 300");
+		input.add("pass 2"); // Pass is not an output
+
+		List<String> actual = masterControl.start(input);
+
+		assertEquals(3, actual.size());
+		assertEquals("creat checking 12345678 1.0", actual.get(0)); // Invalid command
+		assertEquals("depositt 12345678 100", actual.get(1)); // Invalid command
+		assertEquals("withdrawll 123456789 300", actual.get(2)); // Invalid command
+	}
+
+	@Test
+	void case_insensitive_test() {
+		input.add("creAte cHecKing 12345678 1.0");
+		input.add("dePosIt 12345678 300");
+
+		List<String> actual = masterControl.start(input);
+
+		List<String> expected = new ArrayList<>();
+		expected.add("checking 12345678 300.00 1.00");
+		expected.add("deposit 12345678 300");
+
+		assertEquals(expected, actual); // Expecting case-insensitive handling of commands
+	}
+
+	@Test
+	void full_scenario_test() {
+		input.add("create savings 12345678 0.6");
+		input.add("deposit 12345678 700");
+		input.add("deposit 12345678 5000");
+		input.add("creAte cHecKing 98765432 0.01");
+		input.add("deposit 98765432 300");
+		input.add("transfer 98765432 12345678 300");
+		input.add("pass 1");
+		input.add("create cd 23456789 1.2 2000");
+
+		List<String> actual = masterControl.start(input);
+		List<String> expected = new ArrayList<>();
+
+		expected.add("savings 12345678 1000.50 0.60");
+		expected.add("deposit 12345678 700");
+		expected.add("transfer 98765432 12345678 300");
+		expected.add("cd 23456789 2000.00 1.20");
+		expected.add("deposit 12345678 5000");
+
+		assertEquals(expected, actual, "Output should match the expected account details and transaction history.");
+	}
 }

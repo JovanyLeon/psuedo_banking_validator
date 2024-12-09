@@ -3,54 +3,60 @@ package banking;
 public class CommandProcessor {
 	private final Bank bank;
 	private final CommandValidator commandValidator;
+	private final CommandStorage commandStorage;
+	private final CreateCommandProcessor createCommandProcessor;
+	private final DepositCommandProcessor depositCommandProcessor;
+	private final PassCommandProcessor passCommandProcessor;
+	private final WithdrawCommandProcessor withdrawCommandProcessor;
+	private final TransferCommandProcessor transferCommandProcessor;
 
 	public CommandProcessor(Bank bank) {
 		this.bank = bank;
-		this.commandValidator = new CommandValidator(bank); // Internally initialize the validator
+		this.commandValidator = new CommandValidator(bank);
+		this.commandStorage = new CommandStorage();
+		this.createCommandProcessor = new CreateCommandProcessor(bank);
+		this.depositCommandProcessor = new DepositCommandProcessor(bank);
+		this.passCommandProcessor = new PassCommandProcessor(bank);
+		this.withdrawCommandProcessor = new WithdrawCommandProcessor(bank);
+		this.transferCommandProcessor = new TransferCommandProcessor(bank);
 	}
 
 	public void process(String command) {
 		if (!commandValidator.validate(command)) {
-			return; // Ignore invalid commands; they can be stored elsewhere
+			commandStorage.addInvalidCommand(command);
+			return; // Store invalid commands
 		}
 
 		String[] parts = command.split(" ");
-		switch (parts[0]) {
+		String action = parts[0].toLowerCase();
+		// case insensitive
+		switch (action) {
 		case "create":
-			processCreateCommand(parts);
+			createCommandProcessor.process(command);
 			break;
 		case "deposit":
-			processDepositCommand(parts);
+			depositCommandProcessor.process(command);
+			commandStorage.addTransaction(parts[1], action + " " + parts[1] + " " + parts[2]);
+			break;
+		case "withdraw":
+			withdrawCommandProcessor.process(command);
+			commandStorage.addTransaction(parts[1], action + " " + parts[1] + " " + parts[2]);
+			break;
+		case "transfer":
+			transferCommandProcessor.process(command);
+			commandStorage.addTransaction(parts[1], action + " " + parts[1] + " " + parts[2] + " " + parts[3]);
+
+			commandStorage.addTransaction(parts[2], action + " " + parts[1] + " " + parts[2] + " " + parts[3]);
+			break;
+		case "pass":
+			passCommandProcessor.process(command);
 			break;
 		default:
-			throw new UnsupportedOperationException("Unknown command: " + parts[0]);
+			commandStorage.addInvalidCommand(command); // Store unknown commands
 		}
 	}
 
-	private void processCreateCommand(String[] parts) {
-		String accountType = parts[1];
-		String accountId = parts[2];
-		double apr = Double.parseDouble(parts[3]);
-		switch (accountType) {
-		case "checking":
-			bank.createCheckingAccount(accountId, apr);
-			break;
-		case "savings":
-			bank.createSavingsAccount(accountId, apr);
-			break;
-		case "cd":
-			double initialDeposit = Double.parseDouble(parts[4]);
-			bank.createCDAccount(accountId, apr, initialDeposit);
-			break;
-		default:
-			throw new UnsupportedOperationException("Unknown account type: " + accountType);
-		}
-	}
-
-	private void processDepositCommand(String[] parts) {
-		String accountId = parts[1];
-		double amount = Double.parseDouble(parts[2]);
-		Account account = bank.getAccount(accountId);
-		account.deposit(amount);
+	public CommandStorage getCommandStorage() {
+		return commandStorage;
 	}
 }

@@ -19,47 +19,68 @@ public class DepositCommandValidatorTest {
 	@Test
 	public void testValidDepositCommand() {
 		bank.createCheckingAccount("12345678", 1.5);
-		boolean actual = validator.validate(new String[] { "deposit", "12345678", "500" });
+		boolean actual = validator.validate("deposit 12345678 500");
 		assertTrue(actual);
 	}
 
 	@Test
 	public void testInvalidDepositToNonexistentAccount() {
-		boolean actual = validator.validate(new String[] { "deposit", "99999999", "500" });
+		boolean actual = validator.validate("deposit 99999999 500");
 		assertFalse(actual);
 	}
 
 	@Test
 	public void testInvalidTooFewArguments() {
-		boolean actual = validator.validate(new String[] { "deposit", "12345678" });
+		boolean actual = validator.validate("deposit 12345678");
 		assertFalse(actual);
 	}
 
 	@Test
 	public void testInvalidNonNumericDepositAmount() {
 		bank.createSavingsAccount("87654321", 2.0);
-		boolean actual = validator.validate(new String[] { "deposit", "87654321", "five_hundred" });
+		boolean actual = validator.validate("deposit 87654321 five_hundred");
 		assertFalse(actual);
 	}
 
 	@Test
 	public void testInvalidNegativeDepositAmount() {
 		bank.createCheckingAccount("12345678", 1.5);
-		boolean actual = validator.validate(new String[] { "deposit", "12345678", "-500" });
+		boolean actual = validator.validate("deposit 12345678 -500");
 		assertFalse(actual);
 	}
 
 	@Test
 	public void testInvalidDepositZeroAmount() {
 		bank.createCheckingAccount("12345678", 1.5);
-		boolean actual = validator.validate(new String[] { "deposit", "12345678", "0" });
-		assertFalse(actual);
+		boolean actual = validator.validate("deposit 12345678 0");
+		assertTrue(actual);
 	}
 
 	@Test
 	public void testInvalidDepositWithCurrencySymbol() {
 		bank.createSavingsAccount("87654321", 2.0);
-		boolean actual = validator.validate(new String[] { "deposit", "87654321", "$500" });
+		boolean actual = validator.validate("deposit 87654321 $500");
+		assertFalse(actual);
+	}
+
+	@Test
+	public void testInvalidDepositExceedsCheckingLimit() {
+		bank.createCheckingAccount("12345678", 1.5);
+		boolean actual = validator.validate("deposit 12345678 1500");
+		assertFalse(actual);
+	}
+
+	@Test
+	public void testInvalidDepositExceedsSavingsLimit() {
+		bank.createSavingsAccount("87654321", 2.0);
+		boolean actual = validator.validate("deposit 87654321 3000");
+		assertFalse(actual);
+	}
+
+	@Test
+	public void testInvalidDepositIntoCD() {
+		bank.createCDAccount("11223344", 1.5, 1000);
+		boolean actual = validator.validate("deposit 11223344 500");
 		assertFalse(actual);
 	}
 }

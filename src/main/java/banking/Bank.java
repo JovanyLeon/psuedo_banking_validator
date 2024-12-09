@@ -1,7 +1,8 @@
 package banking;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 public class Bank {
@@ -9,6 +10,13 @@ public class Bank {
 
 	public Bank() {
 		this.accounts = new HashMap<>();
+	}
+
+	public void closeAccount(String accountId) {
+		if (!accounts.containsKey(accountId)) {
+			throw new IllegalArgumentException("Account does not exist.");
+		}
+		accounts.remove(accountId);
 	}
 
 	public void createCheckingAccount(String accountId, double apr) {
@@ -43,18 +51,28 @@ public class Bank {
 		return account.getType();
 	}
 
-	public void passTime(int months) {
-		if (months < 1 || months > 60) {
-			throw new IllegalArgumentException("Months must be between 1 and 60.");
-		}
+	public boolean isValidAccountId(String accountId) {
+		return accountId != null && accountId.matches("\\d{8}"); // Account ID must be an 8-digit number
+	}
 
-		Iterator<Map.Entry<String, Account>> iterator = accounts.entrySet().iterator();
-		while (iterator.hasNext()) {
-			Account account = iterator.next().getValue();
-			account.pass(months);
-			if (account.getBalance() == 0) {
-				iterator.remove(); // Close the account if the balance is zero
+	public void passMonths(int months) {
+		for (Account account : accounts.values()) {
+			for (int i = 0; i < months; i++) {
+				account.passMonth();
 			}
 		}
+	}
+
+	public List<String> generateAccountDetails(CommandStorage commandStorage) {
+		List<String> output = new ArrayList<>();
+		for (Account account : accounts.values()) {
+			// Add current account state
+			output.add(account.getFormattedDetails());
+
+			// Add transaction history for the account
+			List<String> transactionHistory = commandStorage.getTransactionHistory(account.getAccountId());
+			output.addAll(transactionHistory);
+		}
+		return output;
 	}
 }

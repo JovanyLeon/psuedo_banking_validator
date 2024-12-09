@@ -42,6 +42,35 @@ public class CommandValidatorTest {
 		assertTrue(actual);
 	}
 
+	@Test
+	public void testValidWithdrawCommand() {
+		bank.createCheckingAccount("12345678", 1.5);
+		bank.getAccount("12345678").deposit(500);
+		boolean actual = validator.validate("withdraw 12345678 300");
+		assertTrue(actual);
+	}
+
+	@Test
+	public void testValidTransferCommand() {
+		bank.createCheckingAccount("12345678", 1.5);
+		bank.createSavingsAccount("87654321", 2.0);
+		bank.getAccount("12345678").deposit(500);
+		boolean actual = validator.validate("transfer 12345678 87654321 300");
+		assertTrue(actual);
+	}
+
+	@Test
+	public void testValidPassCommand() {
+		boolean actual = validator.validate("pass 1");
+		assertTrue(actual);
+	}
+
+	@Test
+	public void testValidPassMultipleMonthsCommand() {
+		boolean actual = validator.validate("pass 12");
+		assertTrue(actual);
+	}
+
 	// Invalid Test Cases
 	@Test
 	public void testInvalidNegativeAPR() {
@@ -74,6 +103,24 @@ public class CommandValidatorTest {
 	}
 
 	@Test
+	public void testInvalidTooFewArgumentsWithdraw() {
+		boolean actual = validator.validate("withdraw 12345678");
+		assertFalse(actual);
+	}
+
+	@Test
+	public void testInvalidTooFewArgumentsTransfer() {
+		boolean actual = validator.validate("transfer 12345678 87654321");
+		assertFalse(actual);
+	}
+
+	@Test
+	public void testInvalidTooFewArgumentsPass() {
+		boolean actual = validator.validate("pass");
+		assertFalse(actual);
+	}
+
+	@Test
 	public void testInvalidTooManyArgumentsCreate() {
 		boolean actual = validator.validate("create cd 11223344 1.5 1000 extra");
 		assertFalse(actual);
@@ -93,9 +140,55 @@ public class CommandValidatorTest {
 	}
 
 	@Test
+	public void testInvalidNonNumericWithdrawAmount() {
+		bank.createCheckingAccount("12345678", 1.5);
+		bank.getAccount("12345678").deposit(500);
+		boolean actual = validator.validate("withdraw 12345678 five_hundred");
+		assertFalse(actual);
+	}
+
+	@Test
+	public void testInvalidNonNumericTransferAmount() {
+		bank.createCheckingAccount("12345678", 1.5);
+		bank.createSavingsAccount("87654321", 2.0);
+		bank.getAccount("12345678").deposit(500);
+		boolean actual = validator.validate("transfer 12345678 87654321 five_hundred");
+		assertFalse(actual);
+	}
+
+	@Test
 	public void testInvalidNegativeDepositAmount() {
 		bank.createCheckingAccount("12345678", 1.5);
 		boolean actual = validator.validate("deposit 12345678 -500");
+		assertFalse(actual);
+	}
+
+	@Test
+	public void testInvalidNegativeWithdrawAmount() {
+		bank.createCheckingAccount("12345678", 1.5);
+		bank.getAccount("12345678").deposit(500);
+		boolean actual = validator.validate("withdraw 12345678 -300");
+		assertFalse(actual);
+	}
+
+	@Test
+	public void testInvalidNegativeTransferAmount() {
+		bank.createCheckingAccount("12345678", 1.5);
+		bank.createSavingsAccount("87654321", 2.0);
+		bank.getAccount("12345678").deposit(500);
+		boolean actual = validator.validate("transfer 12345678 87654321 -300");
+		assertFalse(actual);
+	}
+
+	@Test
+	public void testInvalidNegativePassMonths() {
+		boolean actual = validator.validate("pass -1");
+		assertFalse(actual);
+	}
+
+	@Test
+	public void testInvalidNonNumericPassMonths() {
+		boolean actual = validator.validate("pass twelve");
 		assertFalse(actual);
 	}
 
@@ -144,15 +237,27 @@ public class CommandValidatorTest {
 	}
 
 	@Test
-	public void testInvalidNegativeDeposit() {
-		boolean actual = validator.validate("deposit 12345678 -100");
-		assertFalse(actual);
+	public void testValidDepositZeroAmount() {
+		bank.createCheckingAccount("12345678", 1.5);
+		boolean actual = validator.validate("deposit 12345678 0");
+		assertTrue(actual);
 	}
 
 	@Test
-	public void testInvalidZeroDeposit() {
-		boolean actual = validator.validate("deposit 12345678 0");
-		assertFalse(actual);
+	public void testValidWithdrawZeroAmount() {
+		bank.createCheckingAccount("12345678", 1.5);
+		bank.getAccount("12345678").deposit(500);
+		boolean actual = validator.validate("withdraw 12345678 0");
+		assertTrue(actual);
+	}
+
+	@Test
+	public void testValidTransferZeroAmount() {
+		bank.createCheckingAccount("12345678", 1.5);
+		bank.createSavingsAccount("87654321", 2.0);
+		bank.getAccount("12345678").deposit(500);
+		boolean actual = validator.validate("transfer 12345678 87654321 0");
+		assertTrue(actual);
 	}
 
 	@Test

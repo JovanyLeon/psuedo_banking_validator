@@ -16,11 +16,16 @@ public class CommandValidator {
 		String action = parts[0].toLowerCase();
 
 		if (action.equals("create")) {
-			return new CreateCommandValidator(bank).validate(parts);
+			return new CreateCommandValidator(bank).validate(command);
 		} else if (action.equals("deposit")) {
-			return new DepositCommandValidator(bank).validate(parts);
+			return new DepositCommandValidator(bank).validate(command);
+		} else if (action.equals("pass")) {
+			return new PassCommandValidator(bank).validate(command);
+		} else if (action.equals("withdraw")) {
+			return new WithdrawCommandValidator(bank).validate(command);
+		} else if (action.equals("transfer")) {
+			return new TransferCommandValidator(bank).validate(command);
 		}
-
 		return false; // Unsupported command type
 	}
 }

@@ -1,15 +1,26 @@
 package banking;
 
+import java.text.DecimalFormat;
+
 public abstract class Account {
+
+	private static final DecimalFormat decimalFormat = new DecimalFormat("0.00");
+
+	static {
+		decimalFormat.setRoundingMode(java.math.RoundingMode.FLOOR);
+	}
 
 	private final String accountId;
 	private final double apr; // Annual Percentage Rate
 	private double balance;
+	private int withdrawalsThisMonth;
+	private int monthsPassed;
 
 	protected Account(String accountId, double apr) {
 		this.accountId = accountId;
 		this.apr = apr;
 		this.balance = 0.0;
+		this.withdrawalsThisMonth = 0;
 	}
 
 	public String getAccountId() {
@@ -36,6 +47,7 @@ public abstract class Account {
 
 	public double withdraw(double amount) {
 		if (amount > 0) {
+			withdrawalsThisMonth++;
 			if (this.balance >= amount) {
 				this.balance -= amount;
 			} else {
@@ -45,28 +57,43 @@ public abstract class Account {
 		return amount;
 	}
 
+	public double transfer(double amount) {
+		double actualWithdraw = Math.min(amount, balance);
+		this.balance -= actualWithdraw;
+		if (balance < 0) {
+			this.balance = 0;
+		}
+		return actualWithdraw;
+	}
+
+	public void passMonth() {
+		monthsPassed++; // Increment months passed
+		withdrawalsThisMonth = 0; // Reset withdrawals for the new month
+	}
+
+	public int getMonthsPassed() {
+		return monthsPassed;
+	}
+
+	public int getWithdrawalsThisMonth() {
+		return withdrawalsThisMonth;
+	}
+
 	public abstract String getType();
 
 	public void calculateMonthlyAPR() {
 		if (balance > 0) {
-			double monthlyRate = apr / 100 / 12; // Convert APR to monthly rate
-			balance += balance * monthlyRate;
+			double monthlyRate = apr / 100 / 12;
+			double interest = balance * monthlyRate;
+			balance += interest;
 		}
+
+		setBalance(Math.round(getBalance() * 100.0) / 100.0);
 	}
 
-	public void pass(int months) {
-		for (int i = 0; i < months; i++) {
-			// Deduct minimum balance fee if applicable
-			if (balance > 0 && balance < 100) {
-				balance -= 25;
-				if (balance < 0) {
-					balance = 0;
-				}
-			}
-
-			// Accrue monthly APR
-			calculateMonthlyAPR();
-		}
+	public String getFormattedDetails() {
+		return String.format("%s %s %s %s", getType(), accountId, decimalFormat.format(balance),
+				decimalFormat.format(apr));
 	}
 
 }
