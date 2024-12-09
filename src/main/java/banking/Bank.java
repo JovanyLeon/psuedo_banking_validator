@@ -54,13 +54,23 @@ public class Bank {
 	public List<String> generateAccountDetails(CommandStorage commandStorage) {
 		List<String> output = new ArrayList<>();
 		for (Account account : accounts.values()) {
+			String accountType = capitalizeFirstLetter(account.getType());
+			String accountDetail = String.format("%s %s %.2f %.2f", accountType, account.getAccountId(),
+					account.getBalance(), account.getApr());
 			// Add current account state
-			output.add(account.getFormattedDetails());
+			output.add(accountDetail);
 
 			// Add transaction history for the account
 			List<String> transactionHistory = commandStorage.getTransactionHistory(account.getAccountId());
 			output.addAll(transactionHistory);
 		}
 		return output;
+	}
+
+	private String capitalizeFirstLetter(String str) {
+		if (str == null || str.isEmpty()) {
+			return str;
+		}
+		return str.substring(0, 1).toUpperCase() + str.substring(1).toLowerCase();
 	}
 }

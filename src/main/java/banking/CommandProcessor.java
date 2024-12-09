@@ -29,24 +29,22 @@ public class CommandProcessor {
 
 		String[] parts = command.split(" ");
 		String action = parts[0].toLowerCase();
-		// case insensitive
 		switch (action) {
 		case "create":
 			createCommandProcessor.process(command);
 			break;
 		case "deposit":
 			depositCommandProcessor.process(command);
-			commandStorage.addTransaction(parts[1], action + " " + parts[1] + " " + parts[2]);
+			commandStorage.addTransaction(parts[1], command); // Store deposit transaction
 			break;
 		case "withdraw":
 			withdrawCommandProcessor.process(command);
-			commandStorage.addTransaction(parts[1], action + " " + parts[1] + " " + parts[2]);
+			commandStorage.addTransaction(parts[1], command); // Store withdraw transaction
 			break;
 		case "transfer":
 			transferCommandProcessor.process(command);
-			commandStorage.addTransaction(parts[1], action + " " + parts[1] + " " + parts[2] + " " + parts[3]);
-
-			commandStorage.addTransaction(parts[2], action + " " + parts[1] + " " + parts[2] + " " + parts[3]);
+			commandStorage.addTransaction(parts[1], command); // Store transfer transaction for withdrawal
+			commandStorage.addTransaction(parts[2], command); // Store transfer transaction for deposit
 			break;
 		case "pass":
 			passCommandProcessor.process(command);

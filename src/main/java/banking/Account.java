@@ -87,9 +87,4 @@ public abstract class Account {
 		setBalance(Math.round(getBalance() * 100.0) / 100.0);
 	}
 
-	public String getFormattedDetails() {
-		return String.format("%s %s %s %s", getType(), accountId, decimalFormat.format(balance),
-				decimalFormat.format(apr));
-	}
-
 }
